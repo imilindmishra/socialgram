@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 
-type User = { id: string; email: string; name: string } | null;
+type User = { id: string; email: string; name: string; username?: string | null; profilePicture?: string | null } | null;
 
 interface AuthContextValue {
   user: User;
   isAuthenticated: boolean;
+  needsUsername: boolean;
   token: string | null;
   loginWithToken: (token: string) => void;
   logout: () => void;
@@ -57,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextValue = {
     user,
     isAuthenticated: Boolean(token && user),
+    needsUsername: Boolean(token && user && !user?.username),
     token,
     loginWithToken,
     logout,
@@ -71,4 +73,3 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
-
