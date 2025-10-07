@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import passport from 'passport';
-import { configurePassport } from '../config/passport.js';
-import { signJwt } from '../utils/jwt.js';
-import { requireAuth, AuthedRequest } from '../middleware/auth.js';
+import { configurePassport } from '../config/passport';
+import { signJwt } from '../utils/jwt';
+import { requireAuth, AuthedRequest } from '../middleware/auth';
+import { User } from '../models/User';
 
 configurePassport();
 
@@ -24,8 +25,9 @@ router.get(
   }
 );
 
-router.get('/me', requireAuth, (req: AuthedRequest, res) => {
-  res.json({ user: req.user });
+router.get('/me', requireAuth, async (req: AuthedRequest, res) => {
+  const me = await User.findById(req.user!.id, 'name email profilePicture username');
+  res.json({ user: { id: req.user!.id, email: me?.email || req.user!.email, name: me?.name || req.user!.name, username: me?.username || null, profilePicture: me?.profilePicture } });
 });
 
 router.get('/failure', (_req, res) => {
