@@ -2,9 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import passport from 'passport';
-import { connectDB } from './config/db.js';
-import authRoutes from './routes/authRoutes.js';
-import { errorHandler } from './middleware/errorHandler.js';
+import { connectDB } from './config/db';
+import authRoutes from './routes/authRoutes';
+import postRoutes from './routes/postRoutes';
+import userRoutes from './routes/userRoutes';
+import { errorHandler } from './middleware/errorHandler';
 
 dotenv.config();
 
@@ -32,6 +34,8 @@ app.get('/api/health', (_req, res) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/users', userRoutes);
 
 // Error handler
 app.use(errorHandler);
