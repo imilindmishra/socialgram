@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyJwt } from '../utils/jwt.js';
+import { verifyJwt } from '../utils/jwt';
 
 export interface AuthedRequest extends Request {
   user?: { id: string; email: string; name: string };
@@ -19,4 +19,3 @@ export function requireAuth(req: AuthedRequest, res: Response, next: NextFunctio
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
-

@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
-import { User } from '../models/User.js';
+import { User } from '../models/User';
 
 export function configurePassport() {
   const clientID = process.env.GOOGLE_CLIENT_ID as string;
@@ -39,4 +39,3 @@ export function configurePassport() {
     )
   );
 }
-
