@@ -7,13 +7,14 @@ import authRoutes from './routes/authRoutes';
 import postRoutes from './routes/postRoutes';
 import userRoutes from './routes/userRoutes';
 import { errorHandler } from './middleware/errorHandler';
+import { CLIENT_URL as CLIENT_ORIGIN, PORT as APP_PORT } from './constants/env';
 
 dotenv.config();
 
 const app = express();
 
-const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
-const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
+const CLIENT_URL = CLIENT_ORIGIN;
+const PORT = APP_PORT;
 
 app.use(
   cors({
