@@ -1,4 +1,5 @@
 import { Post, IPost } from '../models/Post';
+import type { IPostRepo } from '../interfaces/postRepo';
 
 export async function listPostsPopulated() {
   return Post.find()
@@ -29,3 +30,9 @@ export async function savePost(post: IPost) {
   return populatePost(post);
 }
 
+export const postRepo: IPostRepo = {
+  list: () => listPostsPopulated(),
+  create: (doc) => createPost(doc),
+  findById: (id) => findPostById(id),
+  save: (post) => savePost(post),
+};
