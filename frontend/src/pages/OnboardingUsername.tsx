@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../constants/env';
 
 export default function OnboardingUsername() {
   const { token, refreshMe } = useAuth();
@@ -11,7 +12,7 @@ export default function OnboardingUsername() {
 
   useEffect(() => { document.title = 'Choose a username • SocialGram'; }, []);
 
-  const api = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  const api = API_URL;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,4 +58,3 @@ export default function OnboardingUsername() {
     </form>
   );
 }
-
