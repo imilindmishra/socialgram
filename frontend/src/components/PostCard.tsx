@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { API_URL } from '../constants/env';
 
 type Author = { name: string; profilePicture?: string };
 type Comment = { user: { name: string; profilePicture?: string } | string; text: string; createdAt: string };
@@ -21,7 +22,7 @@ export default function PostCard({ post: initial }: { post: Post }) {
   const me = user?.id;
   const liked = !!post.likes?.some((id) => id === me);
 
-  const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+  const apiBase = API_URL;
 
   const toggleLike = async () => {
     // optimistic

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { API_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '../constants/env';
 
 export default function CreatePost() {
   const { token } = useAuth();
@@ -25,8 +26,8 @@ export default function CreatePost() {
     if (!file) throw new Error('Please select an image');
     if (file.size > 5 * 1024 * 1024) throw new Error('Image too large (max 5MB)');
 
-    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
-    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+    const cloudName = CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = CLOUDINARY_UPLOAD_PRESET;
     if (!cloudName || !uploadPreset) throw new Error('Cloudinary env vars missing');
 
     const form = new FormData();
@@ -48,7 +49,7 @@ export default function CreatePost() {
     setError(null);
     try {
       const imageUrl = await uploadToCloudinary();
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/posts`, {
+      const res = await fetch(`${API_URL}/api/posts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,4 +101,3 @@ export default function CreatePost() {
     </form>
   );
 }
-

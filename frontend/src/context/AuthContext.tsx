@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
+import { API_URL } from '../constants/env';
 
 type User = { id: string; email: string; name: string; username?: string | null; profilePicture?: string | null } | null;
 
@@ -20,7 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User>(null);
 
   const api = useMemo(() => {
-    const instance = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000' });
+    const instance = axios.create({ baseURL: API_URL });
     instance.interceptors.request.use((config) => {
       if (token) config.headers.Authorization = `Bearer ${token}`;
       return config;
