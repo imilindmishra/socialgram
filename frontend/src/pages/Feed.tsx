@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import PostCard, { Post } from '../components/PostCard';
-import { API_URL } from '../constants/env';
 
 export default function Feed() {
   const { user, token } = useAuth();
@@ -12,7 +11,7 @@ export default function Feed() {
     document.title = 'Feed • SocialGram';
     const load = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/posts`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/posts`, {
           headers: { Authorization: token ? `Bearer ${token}` : '' },
         });
         if (res.ok) {

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import PostCard, { Post } from '../components/PostCard';
-import { API_URL } from '../constants/env';
 
 type PublicUser = { username: string; name: string; profilePicture?: string; createdAt: string };
 
@@ -12,7 +11,7 @@ export default function PublicProfile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const api = API_URL;
+  const api = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
   useEffect(() => {
     document.title = `${username} • SocialGram`;
@@ -57,3 +56,4 @@ export default function PublicProfile() {
     </div>
   );
 }
+

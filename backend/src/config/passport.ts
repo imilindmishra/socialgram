@@ -1,12 +1,11 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
 import { User } from '../models/User';
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SERVER_URL } from '../constants/env';
 
 export function configurePassport() {
-  const clientID = GOOGLE_CLIENT_ID as string;
-  const clientSecret = GOOGLE_CLIENT_SECRET as string;
-  const callbackURL = `${SERVER_URL}/api/auth/google/callback`;
+  const clientID = process.env.GOOGLE_CLIENT_ID as string;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET as string;
+  const callbackURL = `${process.env.SERVER_URL}/api/auth/google/callback`;
 
   passport.use(
     new GoogleStrategy(
