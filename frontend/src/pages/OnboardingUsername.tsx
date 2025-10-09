@@ -1,45 +1,26 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../constants/env';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { useUsername } from '../hooks/useUsername';
 
 export default function OnboardingUsername() {
-  const { token, refreshMe } = useAuth();
-  const [username, setUsername] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const { refreshMe } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => { document.title = 'Choose a username • SocialGram'; }, []);
-
-  const api = API_URL;
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setError(null);
-    try {
-      const res = await fetch(`${api}/api/users/me`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        body: JSON.stringify({ username }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Failed to set username');
-      await refreshMe();
-      navigate('/feed', { replace: true });
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  useDocumentTitle('Choose a username • SocialGram');
+  const { username, setUsername, error, submitting, submit } = useUsername();
 
   return (
-    <form onSubmit={submit} className="max-w-md mx-auto flex flex-col gap-3">
+    <form
+      onSubmit={async (e) => {
+        e.preventDefault();
+        try {
+          await submit();
+          await refreshMe();
+          navigate('/feed', { replace: true });
+        } catch {}
+      }}
+      className="max-w-md mx-auto flex flex-col gap-3"
+    >
       <h1 className="text-xl font-semibold">Pick a username</h1>
       <p className="text-sm text-gray-600">Letters, numbers, dots, underscores. 3–20 characters.</p>
       <input

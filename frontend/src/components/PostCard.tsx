@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../constants/env';
+import { usePostLike } from '../hooks/usePostLike';
+import { usePostComments } from '../hooks/usePostComments';
 
 type Author = { name: string; profilePicture?: string };
 type Comment = { user: { name: string; profilePicture?: string } | string; text: string; createdAt: string };
@@ -15,54 +15,10 @@ export interface Post {
 }
 
 export default function PostCard({ post: initial }: { post: Post }) {
-  const { token, user } = useAuth();
   const [post, setPost] = useState<Post>(initial);
   const [showComments, setShowComments] = useState(false);
-  const [commentText, setCommentText] = useState('');
-  const me = user?.id;
-  const liked = !!post.likes?.some((id) => id === me);
-
-  const apiBase = API_URL;
-
-  const toggleLike = async () => {
-    // optimistic
-    setPost((p) => ({
-      ...p,
-      likes: liked ? p.likes.filter((id) => id !== me) : [...(p.likes || []), me!],
-    }));
-    try {
-      const res = await fetch(`${apiBase}/api/posts/${post._id}/like`, {
-        method: 'POST',
-        headers: { Authorization: token ? `Bearer ${token}` : '' },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setPost(data.post);
-      }
-    } catch {
-      // ignore; next fetch will correct state
-    }
-  };
-
-  const submitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!commentText.trim()) return;
-    try {
-      const res = await fetch(`${apiBase}/api/posts/${post._id}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        body: JSON.stringify({ text: commentText.trim() }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setPost(data.post);
-        setCommentText('');
-      }
-    } catch {}
-  };
+  const { liked, toggleLike } = usePostLike(post, setPost);
+  const { commentText, setCommentText, submitComment } = usePostComments(post, setPost);
 
   return (
     <article className="bg-white border rounded-md overflow-hidden">

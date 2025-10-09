@@ -1,0 +1,95 @@
+import request from 'supertest';
+import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+
+// Set env before importing app and modules that read env
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'testsecret';
+process.env.CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
+process.env.SERVER_URL = process.env.SERVER_URL || 'http://localhost:4000';
+process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'test-google-id';
+process.env.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || 'test-google-secret';
+
+import { app } from '../../app';
+import { connectDB } from '../../config/db';
+import { User } from '../../models/User';
+import { signJwt } from '../../utils/jwt';
+
+describe('API E2E', () => {
+  let mongo: MongoMemoryServer;
+  let token: string;
+
+  beforeAll(async () => {
+    mongo = await MongoMemoryServer.create();
+    const uri = mongo.getUri();
+    process.env.MONGODB_URI = uri;
+    await connectDB();
+
+    const user = await User.create({
+      googleId: 'gid-1',
+      email: 't@example.com',
+      name: 'Test User',
+      profilePicture: 'https://example.com/pp.png',
+    });
+    // Mongoose provides a string virtual id
+    token = signJwt({ sub: user.id, email: user.email, name: user.name });
+  });
+
+  afterAll(async () => {
+    await mongoose.connection.close();
+    await mongo.stop();
+  });
+
+  test('health check', async () => {
+    const res = await request(app).get('/api/health');
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+  });
+
+  test('create, list, like, and comment on a post', async () => {
+    // Create
+    const createRes = await request(app)
+      .post('/api/posts')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ caption: 'hello', imageUrl: 'https://example.com/img.jpg' });
+    expect(createRes.status).toBe(201);
+    expect(createRes.body.post.caption).toBe('hello');
+    const postId = createRes.body.post._id as string;
+
+    // List
+    const listRes = await request(app)
+      .get('/api/posts')
+      .set('Authorization', `Bearer ${token}`);
+    expect(listRes.status).toBe(200);
+    expect(Array.isArray(listRes.body.posts)).toBe(true);
+    expect(listRes.body.posts.length).toBeGreaterThanOrEqual(1);
+
+    // Like toggle
+    const likeRes = await request(app)
+      .post(`/api/posts/${postId}/like`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(likeRes.status).toBe(200);
+    expect(likeRes.body.post.likes.length).toBe(1);
+
+    const unlikeRes = await request(app)
+      .post(`/api/posts/${postId}/like`)
+      .set('Authorization', `Bearer ${token}`);
+    expect(unlikeRes.status).toBe(200);
+    expect(unlikeRes.body.post.likes.length).toBe(0);
+
+    // Comment
+    const commentRes = await request(app)
+      .post(`/api/posts/${postId}/comments`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({ text: 'Nice!' });
+    expect(commentRes.status).toBe(201);
+    expect(commentRes.body.post.comments.at(-1)?.text).toBe('Nice!');
+  });
+
+  test('auth me returns current user', async () => {
+    const res = await request(app)
+      .get('/api/auth/me')
+      .set('Authorization', `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.user.email).toBe('t@example.com');
+  });
+});

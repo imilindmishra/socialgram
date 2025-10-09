@@ -26,7 +26,7 @@ export async function updateMe(req: AuthedRequest, res: Response) {
   if (msg) return res.status(400).json({ error: msg });
 
   const exists = await User.findOne({ username: username.toLowerCase() });
-  if (exists && exists._id.toString() !== userId) {
+  if (exists && exists.id !== userId) {
     return res.status(409).json({ error: 'Username already taken' });
   }
   const updated = await User.findByIdAndUpdate(
@@ -59,4 +59,3 @@ export async function listUserPosts(req: Request, res: Response) {
     .populate('comments.user', 'name profilePicture');
   res.json({ posts });
 }
-

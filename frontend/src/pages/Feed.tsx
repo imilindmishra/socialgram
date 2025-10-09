@@ -1,30 +1,12 @@
-import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import PostCard, { Post } from '../components/PostCard';
-import { API_URL } from '../constants/env';
+import PostCard from '../components/PostCard';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { usePosts } from '../hooks/usePosts';
 
 export default function Feed() {
-  const { user, token } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    document.title = 'Feed • SocialGram';
-    const load = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/posts`, {
-          headers: { Authorization: token ? `Bearer ${token}` : '' },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setPosts(data.posts || []);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
+  useDocumentTitle('Feed • SocialGram');
+  const { user } = useAuth();
+  const { posts, loading } = usePosts();
 
   if (loading) return <p className="p-4">Loading…</p>;
 

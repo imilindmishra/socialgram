@@ -1,40 +1,12 @@
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import PostCard, { Post } from '../components/PostCard';
-import { API_URL } from '../constants/env';
-
-type PublicUser = { username: string; name: string; profilePicture?: string; createdAt: string };
+import PostCard from '../components/PostCard';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { usePublicProfile } from '../hooks/usePublicProfile';
 
 export default function PublicProfile() {
   const { username = '' } = useParams();
-  const [user, setUser] = useState<PublicUser | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const api = API_URL;
-
-  useEffect(() => {
-    document.title = `${username} • SocialGram`;
-    const load = async () => {
-      try {
-        const [uRes, pRes] = await Promise.all([
-          fetch(`${api}/api/users/${username}`),
-          fetch(`${api}/api/users/${username}/posts`),
-        ]);
-        if (!uRes.ok) throw new Error('User not found');
-        const u = await uRes.json();
-        const p = await pRes.json();
-        setUser(u.user);
-        setPosts(p.posts || []);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load profile');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [username]);
+  useDocumentTitle(`${username} • SocialGram`);
+  const { user, posts, loading, error } = usePublicProfile(username);
 
   if (loading) return <p className="p-4">Loading…</p>;
   if (error) return <p className="p-4 text-red-600">{error}</p>;
