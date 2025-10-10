@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { API_URL } from '../constants/env';
+import { getPublicProfile, listUserPosts } from '../lib/api';
 
 type PublicUser = { username: string; name: string; profilePicture?: string; createdAt: string };
 import type { Post } from '../components/PostCard';
@@ -15,8 +15,8 @@ export function usePublicProfile(username: string) {
     setError(null);
     try {
       const [uRes, pRes] = await Promise.all([
-        fetch(`${API_URL}/api/users/${username}`),
-        fetch(`${API_URL}/api/users/${username}/posts`),
+        getPublicProfile(username),
+        listUserPosts(username),
       ]);
       if (!uRes.ok) throw new Error('User not found');
       const u = await uRes.json();
@@ -36,4 +36,3 @@ export function usePublicProfile(username: string) {
 
   return { user, posts, loading, error, reload: load };
 }
-

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthedApi } from './useAuthedApi';
-import { useCloudinaryUpload } from './useCloudinaryUpload';
+import { uploadImageToCloudinary } from '../lib/cloudinary';
+import { createPost } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 
 export function useCreatePost() {
-  const api = useAuthedApi();
-  const upload = useCloudinaryUpload();
+  const { token } = useAuth();
   const navigate = useNavigate();
 
   const [caption, setCaption] = useState('');
@@ -29,8 +29,8 @@ export function useCreatePost() {
     setSubmitting(true);
     setError(null);
     try {
-      const imageUrl = await upload(file!);
-      const res = await api.post('/api/posts', { caption, imageUrl });
+      const imageUrl = await uploadImageToCloudinary(file!);
+      const res = await createPost(token || undefined, { caption, imageUrl });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Failed to create post');
@@ -45,4 +45,3 @@ export function useCreatePost() {
 
   return { caption, setCaption, file, preview, submitting, error, onFileChange, submit };
 }
-

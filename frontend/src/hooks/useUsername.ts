@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { useAuthedApi } from './useAuthedApi';
+import { updateMe } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 
 export function useUsername() {
-  const api = useAuthedApi();
+  const { token } = useAuth();
   const [username, setUsername] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -11,7 +12,7 @@ export function useUsername() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await api.patch('/api/users/me', { username });
+      const res = await updateMe(token || undefined, { username });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Failed to set username');
     } catch (err: any) {
@@ -24,4 +25,3 @@ export function useUsername() {
 
   return { username, setUsername, error, submitting, submit };
 }
-

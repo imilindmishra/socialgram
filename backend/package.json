@@ -7,7 +7,9 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:unit": "jest --testPathIgnorePatterns \"/e2e/\"",
+    "test:e2e": "jest src/__tests__/e2e"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -1,5 +1,5 @@
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../constants/env';
+import { toggleLike as apiToggleLike } from '../lib/api';
 import type { Post } from '../components/PostCard';
 
 export function usePostLike(post: Post, setPost: (p: Post) => void) {
@@ -14,10 +14,7 @@ export function usePostLike(post: Post, setPost: (p: Post) => void) {
       likes: liked ? post.likes.filter((id) => id !== me) : [...(post.likes || []), me!],
     });
     try {
-      const res = await fetch(`${API_URL}/api/posts/${post._id}/like`, {
-        method: 'POST',
-        headers: { Authorization: token ? `Bearer ${token}` : '' },
-      });
+      const res = await apiToggleLike(token || undefined, post._id);
       if (res.ok) {
         const data = await res.json();
         setPost(data.post);
@@ -29,4 +26,3 @@ export function usePostLike(post: Post, setPost: (p: Post) => void) {
 
   return { liked, toggleLike };
 }
-

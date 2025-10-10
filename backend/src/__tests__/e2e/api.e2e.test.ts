@@ -24,8 +24,9 @@ describe('API E2E', () => {
     process.env.MONGODB_URI = uri;
     await connectDB();
 
+    const gid = `gid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const user = await User.create({
-      googleId: 'gid-1',
+      googleId: gid,
       email: 't@example.com',
       name: 'Test User',
       profilePicture: 'https://example.com/pp.png',

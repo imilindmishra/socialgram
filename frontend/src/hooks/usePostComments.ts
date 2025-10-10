@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../constants/env';
+import { addComment as apiAddComment } from '../lib/api';
 import type { Post } from '../components/PostCard';
 
 export function usePostComments(post: Post, setPost: (p: Post) => void) {
@@ -11,14 +11,7 @@ export function usePostComments(post: Post, setPost: (p: Post) => void) {
     if (e) e.preventDefault();
     if (!commentText.trim()) return;
     try {
-      const res = await fetch(`${API_URL}/api/posts/${post._id}/comments`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-        body: JSON.stringify({ text: commentText.trim() }),
-      });
+      const res = await apiAddComment(token || undefined, post._id, commentText.trim());
       if (res.ok) {
         const data = await res.json();
         setPost(data.post);
@@ -31,4 +24,3 @@ export function usePostComments(post: Post, setPost: (p: Post) => void) {
 
   return { commentText, setCommentText, submitComment };
 }
-
