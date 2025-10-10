@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React, { useState } from 'react';
+import { userEvent, within, expect } from '@storybook/test';
 import CreatePostForm from './CreatePostForm';
 
 const meta = {
@@ -7,14 +8,7 @@ const meta = {
   component: CreatePostForm,
   parameters: {
     layout: 'centered',
-    docs: {
-      description: {
-        component:
-          'Presentational form for creating a post. Handles caption, image file selection, preview, and submit action via callbacks.',
-      },
-    },
   },
-  tags: ['autodocs'],
   argTypes: {
     caption: { control: 'text', description: 'Caption value' },
     onCaptionChange: { action: 'change-caption', description: 'Called when caption changes' },
@@ -55,22 +49,12 @@ export const Playground: Story = {
       </div>
     );
   },
-};
-
-export const Submitting: Story = {
-  args: {
-    caption: 'Uploading now…',
-    preview: 'https://picsum.photos/seed/form/800/500',
-    submitting: true,
-    error: null,
-  },
-};
-
-export const WithError: Story = {
-  args: {
-    caption: 'Oops',
-    preview: 'https://picsum.photos/seed/form/800/500',
-    submitting: false,
-    error: 'Failed to upload image',
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const ta = c.getByPlaceholderText(/write a caption/i);
+    await userEvent.clear(ta);
+    await userEvent.type(ta, 'Hello from play');
+    await expect(c.getByDisplayValue('Hello from play')).toBeInTheDocument();
+    await userEvent.click(c.getByRole('button', { name: /^post$/i }));
   },
 };
