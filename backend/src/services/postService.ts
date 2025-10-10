@@ -24,6 +24,7 @@ export function createPostService(r: IPostRepo) {
     listPosts: () => listPosts(r),
     toggleLike: (postId: string, userId: string) => toggleLike(postId, userId, r),
     addComment: (postId: string, userId: string, text?: string) => addComment(postId, userId, text, r),
+    addReply: (postId: string, commentId: string, userId: string, text?: string) => addReply(postId, commentId, userId, text, r),
   };
 }
 
@@ -60,5 +61,25 @@ export async function addComment(postId: string, userId: string, text?: string, 
   const post = await repoArg.findById(postId);
   if (!post) throw notFound('Post not found');
   post.comments.push({ user: userId as any, text: text.trim(), createdAt: new Date() });
+  return repoArg.save(post);
+}
+
+export async function addReply(
+  postId: string,
+  commentId: string,
+  userId: string,
+  text?: string,
+  repoArg: IPostRepo = repo
+) {
+  if (!text || !text.trim()) throw badRequest('Reply text is required');
+  if (text.length > 500) throw badRequest('Reply too long (max 500)');
+
+  const post = await repoArg.findById(postId);
+  if (!post) throw notFound('Post not found');
+
+  const target = post.comments.find((c: any) => c._id?.toString() === commentId);
+  if (!target) throw notFound('Comment not found');
+  if (!Array.isArray((target as any).replies)) (target as any).replies = [];
+  (target as any).replies.push({ user: userId as any, text: text.trim(), createdAt: new Date() });
   return repoArg.save(post);
 }

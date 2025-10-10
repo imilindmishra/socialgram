@@ -31,3 +31,12 @@ export async function addComment(req: AuthedRequest, res: Response) {
   const post = await postService.addComment(id, userId, text);
   return res.status(201).json({ post });
 }
+
+export async function addReply(req: AuthedRequest, res: Response) {
+  const userId = req.user?.id;
+  const { id, commentId } = req.params as { id: string; commentId: string };
+  const { text } = req.body as { text?: string };
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  const post = await postService.addReply(id, commentId, userId, text);
+  return res.status(201).json({ post });
+}

@@ -56,6 +56,27 @@ export async function listUserPosts(req: Request, res: Response) {
   const posts = await Post.find({ author: user._id })
     .sort({ createdAt: -1 })
     .populate('author', 'name profilePicture')
-    .populate('comments.user', 'name profilePicture');
+    .populate('comments.user', 'name profilePicture')
+    .populate('comments.replies.user', 'name profilePicture');
   res.json({ posts });
+}
+
+export async function searchUsers(req: Request, res: Response) {
+  const q = String((req.query.q as string) || '').toLowerCase().trim();
+  if (!q) return res.json({ users: [] });
+  // Prefix match on username, fallback to name contains
+  const regex = new RegExp('^' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const users = await User.find(
+    {
+      $or: [
+        { username: { $regex: regex } },
+        { name: { $regex: q, $options: 'i' } },
+      ],
+    },
+    'username name profilePicture'
+  )
+    .sort({ username: 1 })
+    .limit(8)
+    .lean();
+  res.json({ users });
 }

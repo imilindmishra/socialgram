@@ -44,6 +44,20 @@ export async function addComment(token: string | undefined, postId: string, text
   return res;
 }
 
+export async function addReply(
+  token: string | undefined,
+  postId: string,
+  commentId: string,
+  text: string
+) {
+  const res = await fetch(`${API_URL}/api/posts/${postId}/comments/${commentId}/replies`, {
+    method: 'POST',
+    headers: authHeaders(token, { 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ text }),
+  });
+  return res;
+}
+
 export async function updateMe(token: string | undefined, data: { username: string }) {
   const res = await fetch(`${API_URL}/api/users/me`, {
     method: 'PATCH',
@@ -63,3 +77,9 @@ export async function listUserPosts(username: string) {
   return res;
 }
 
+export async function searchUsers(query: string) {
+  const q = query.trim();
+  if (!q) return { ok: true, json: async () => ({ users: [] }) } as any;
+  const res = await fetch(`${API_URL}/api/users/search?q=${encodeURIComponent(q)}`);
+  return res;
+}

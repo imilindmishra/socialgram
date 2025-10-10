@@ -1,68 +1,53 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { Post as PostType } from './PostCard';
 import { usePostLike } from '../hooks/usePostLike';
 import { usePostComments } from '../hooks/usePostComments';
 import { usePostReplies } from '../hooks/usePostReplies';
 
-type Author = { name: string; profilePicture?: string };
-type Reply = { user: { name: string; profilePicture?: string } | string; text: string; createdAt: string };
-type Comment = { _id?: string; user: { name: string; profilePicture?: string } | string; text: string; createdAt: string; replies?: Reply[] };
-export interface Post {
-  _id: string;
-  author: Author;
-  caption: string;
-  imageUrl: string;
-  likes: string[];
-  comments: Comment[];
-  createdAt: string;
-}
-
-export default function PostCard({ post: initial }: { post: Post }) {
-  const [post, setPost] = useState<Post>(initial);
-  const [showComments, setShowComments] = useState(false);
+export default function PostModal({ post: initial, onClose }: { post: PostType; onClose: () => void }) {
+  const [post, setPost] = useState<PostType>(initial);
   const { liked, toggleLike } = usePostLike(post, setPost);
   const { commentText, setCommentText, submitComment } = usePostComments(post, setPost);
   const { openFor, setOpenFor, texts, setText, submit, submitting } = usePostReplies(post, setPost);
 
+  useEffect(() => {
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onEsc);
+    return () => window.removeEventListener('keydown', onEsc);
+  }, [onClose]);
+
   return (
-    <article className="bg-white border rounded-md overflow-hidden">
-      <header className="flex items-center gap-3 p-3">
-        <img
-          src={post.author?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.name || 'U')}`}
-          alt={post.author?.name}
-          className="w-8 h-8 rounded-full object-cover"
-        />
-        <div className="flex flex-col">
-          <span className="text-sm font-medium">{post.author?.name || 'Unknown'}</span>
-          <span className="text-xs text-gray-500">{new Date(post.createdAt).toLocaleString()}</span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div role="dialog" aria-modal="true" className="relative z-10 bg-white rounded-md shadow-xl w-[min(95vw,1000px)] h-[min(90vh,720px)] flex overflow-hidden">
+        <div className="flex-1 bg-black flex items-center justify-center">
+          <img src={post.imageUrl} alt={post.caption} className="max-h-full max-w-full object-contain" />
         </div>
-      </header>
-      <img src={post.imageUrl} alt={post.caption} className="w-full max-h-[600px] object-cover bg-gray-100" />
-      <div className="p-3 flex flex-col gap-3">
-        <div className="flex items-center gap-4">
-          <button onClick={toggleLike} className={`text-sm ${liked ? 'text-red-600' : 'text-gray-600'}`}>
-            {liked ? '♥ Liked' : '♡ Like'}
-          </button>
-          <span className="text-sm text-gray-700">{post.likes?.length || 0} likes</span>
-          <button onClick={() => setShowComments((s) => !s)} className="text-sm text-blue-600">
-            {showComments ? 'Hide comments' : `View comments (${post.comments?.length || 0})`}
-          </button>
-        </div>
-        <p className="text-sm"><span className="font-semibold mr-2">Caption:</span>{post.caption}</p>
-        {showComments && (
-          <div className="border-t pt-3 flex flex-col gap-3">
-            <form onSubmit={submitComment} className="flex gap-2">
-              <input
-                className="flex-1 border rounded px-2 py-1 text-sm"
-                placeholder="Add a comment…"
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                maxLength={500}
+        <div className="w-[380px] max-w-[50%] flex flex-col">
+          <div className="flex items-center justify-between p-3 border-b">
+            <div className="flex items-center gap-2">
+              <img
+                src={post.author?.profilePicture || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author?.name || 'U')}`}
+                alt={post.author?.name}
+                className="w-8 h-8 rounded-full object-cover"
               />
-              <button className="text-sm bg-blue-600 text-white px-3 py-1 rounded">Post</button>
-            </form>
-            <div className="flex flex-col gap-2">
-              {post.comments?.length ? (
-                post.comments.map((c, i) => (
+              <div className="text-sm font-medium">{post.author?.name}</div>
+            </div>
+            <button className="text-gray-500 hover:text-gray-700" onClick={onClose} aria-label="Close">✕</button>
+          </div>
+          <div className="px-3 py-2 border-b">
+            <div className="text-sm"><span className="font-semibold mr-2">Caption:</span>{post.caption}</div>
+          </div>
+          <div className="px-3 py-2 border-b flex items-center gap-4">
+            <button onClick={toggleLike} className={`text-sm ${liked ? 'text-red-600' : 'text-gray-600'}`}>{liked ? '♥ Liked' : '♡ Like'}</button>
+            <span className="text-sm text-gray-700">{post.likes?.length || 0} likes</span>
+          </div>
+          <div className="flex-1 overflow-auto px-3 py-3">
+            {post.comments?.length ? (
+              <div className="flex flex-col gap-3">
+                {post.comments.map((c, i) => (
                   <div key={c._id || i} className="flex flex-col gap-2">
                     <div className="flex items-start gap-2">
                       <img
@@ -79,15 +64,10 @@ export default function PostCard({ post: initial }: { post: Post }) {
                           type="button"
                           className="text-xs text-blue-600 mt-1"
                           onClick={() => setOpenFor(openFor === (c._id || String(i)) ? null : (c._id || String(i)))}
-                        >
-                          Reply
-                        </button>
+                        >Reply</button>
                         {openFor === (c._id || String(i)) && (
                           <form
-                            onSubmit={(e) => {
-                              e.preventDefault();
-                              submit(c._id || String(i));
-                            }}
+                            onSubmit={(e) => { e.preventDefault(); submit(c._id || String(i)); }}
                             className="mt-2 flex gap-2"
                           >
                             <input
@@ -124,14 +104,25 @@ export default function PostCard({ post: initial }: { post: Post }) {
                       </div>
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500">No comments yet.</p>
-              )}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No comments yet.</p>
+            )}
           </div>
-        )}
+          <form onSubmit={submitComment} className="p-3 border-t flex gap-2">
+            <input
+              className="flex-1 border rounded px-2 py-1 text-sm"
+              placeholder="Add a comment…"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              maxLength={500}
+            />
+            <button className="text-sm bg-blue-600 text-white px-3 py-1 rounded">Post</button>
+          </form>
+        </div>
       </div>
-    </article>
+    </div>
   );
 }
+
