@@ -18,8 +18,26 @@ export async function listPosts(token?: string) {
   return res;
 }
 
+// Tweet API (Phase 1: mirrors post endpoints)
+export async function listTweets(token?: string) {
+  const res = await fetch(`${API_URL}/api/tweets`, { headers: authHeaders(token) });
+  return res;
+}
+
 export async function createPost(token: string | undefined, body: { caption: string; imageUrl: string }) {
   const res = await fetch(`${API_URL}/api/posts`, {
+    method: 'POST',
+    headers: authHeaders(token, { 'Content-Type': 'application/json' }),
+    body: JSON.stringify(body),
+  });
+  return res;
+}
+
+export async function createTweet(
+  token: string | undefined,
+  body: { text: string; media?: string[] }
+) {
+  const res = await fetch(`${API_URL}/api/tweets`, {
     method: 'POST',
     headers: authHeaders(token, { 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
@@ -35,8 +53,25 @@ export async function toggleLike(token: string | undefined, postId: string) {
   return res;
 }
 
+export async function toggleTweetLike(token: string | undefined, tweetId: string) {
+  const res = await fetch(`${API_URL}/api/tweets/${tweetId}/like`, {
+    method: 'POST',
+    headers: authHeaders(token),
+  });
+  return res;
+}
+
 export async function addComment(token: string | undefined, postId: string, text: string) {
   const res = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
+    method: 'POST',
+    headers: authHeaders(token, { 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ text }),
+  });
+  return res;
+}
+
+export async function addTweetComment(token: string | undefined, tweetId: string, text: string) {
+  const res = await fetch(`${API_URL}/api/tweets/${tweetId}/comments`, {
     method: 'POST',
     headers: authHeaders(token, { 'Content-Type': 'application/json' }),
     body: JSON.stringify({ text }),
@@ -51,6 +86,20 @@ export async function addReply(
   text: string
 ) {
   const res = await fetch(`${API_URL}/api/posts/${postId}/comments/${commentId}/replies`, {
+    method: 'POST',
+    headers: authHeaders(token, { 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ text }),
+  });
+  return res;
+}
+
+export async function addTweetReply(
+  token: string | undefined,
+  tweetId: string,
+  commentId: string,
+  text: string
+) {
+  const res = await fetch(`${API_URL}/api/tweets/${tweetId}/comments/${commentId}/replies`, {
     method: 'POST',
     headers: authHeaders(token, { 'Content-Type': 'application/json' }),
     body: JSON.stringify({ text }),

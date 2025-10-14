@@ -1,267 +1,336 @@
----
-
-# 📋 PLAN.md — Mini Social Media App (Bootcamp Project)
-
-**Project Name:** SocialGram
-**Timeline:** 2–3 Days
-**Goal:** Build a simplified Instagram-like app where users can authenticate with Google, create posts (caption + image), and interact through likes and comments.
-
----
-
-## 🎯 **Core Features**
-
-✅ Google OAuth login
-✅ Create posts with caption + image (Cloudinary)
-✅ Feed showing all posts (latest first)
-✅ Like / unlike posts
-✅ Comment on posts
-✅ Responsive, minimal UI
-
----
-
-## ⚙️ **Tech Stack**
-
-**Frontend:** React, TypeScript, Vite, Tailwind CSS, React Router, Axios, Context API
-**Backend:** Node.js, Express.js, TypeScript, Passport (Google OAuth), JWT, Mongoose
-**Database:** MongoDB Atlas
-**Storage:** Cloudinary (Free tier)
-**Hosting:** Vercel (frontend), Render (backend)
-
----
-
-## 🏗️ **Architecture**
-
-**Flow:**
-
-```
-User → React (Axios) → Express Routes → Controllers → MongoDB → Response → Frontend
-```
-
-**Structure:**
-
-* **Backend:** MVC (Models, Controllers, Routes, Middleware)
-* **Frontend:** Component + Page-based, Context API for Auth
-
----
-
-## 🧩 **Database Schemas**
-
-### User
-
-```json
-{
-  "_id": ObjectId,
-  "googleId": String,
-  "email": String,
-  "name": String,
-  "profilePicture": String,
-  "createdAt": Date
-}
-```
-
-### Post
-
-```json
-{
-  "_id": ObjectId,
-  "author": ObjectId (ref: User),
-  "caption": String,
-  "imageUrl": String,
-  "likes": [ObjectId],
-  "comments": [{ "user": ObjectId, "text": String, "createdAt": Date }],
-  "createdAt": Date
-}
-```
-
----
-
-## 🗂️ **Project Structure**
-
-```
-socialgram/
-├── backend/
-│   ├── src/
-│   │   ├── server.ts
-│   │   ├── config/ (db, env, cloudinary)
-│   │   ├── controllers/ (auth, post, user)
-│   │   ├── routes/ (authRoutes, postRoutes)
-│   │   ├── middleware/ (auth, errorHandler)
-│   │   ├── models/ (User, Post)
-│   │   ├── utils/ (jwt, responseHelpers, cloudinary)
-│   │   └── validations/
-│   └── uploads/ (for local test only)
-│
-└── frontend/
-    ├── src/
-    │   ├── pages/ (Home, Login, CreatePost, Profile)
-    │   ├── components/ (Navbar, PostCard, CommentBox)
-    │   ├── context/ (AuthContext)
-    │   ├── lib/api.ts
-    │   ├── utils/formatDate.ts
-    │   └── styles/globals.css
-```
-
----
-
-## 🔐 **Security Essentials**
-
-* JWT expiration → 7 days
-* Validate captions/comments on backend
-* Sanitize all user input
-* Max 5MB image uploads via Cloudinary
-* Never commit `.env` files
-
----
-
-# 🧱 **DEVELOPMENT PHASES**
-
----
-
-## 🏁 **PHASE 1 — Setup & Authentication (Day 1)**
-
-**Goal:** Setup full backend + Google OAuth login + React base setup.
-
-### 🔧 Backend
-
-* Initialize Express + TypeScript project
-* Connect to MongoDB Atlas (`db.ts`)
-* Define `User` model
-* Setup Google OAuth via Passport
-* Implement JWT generation (`jwt.ts`)
-* Routes:
-
-  * `GET /api/auth/google`
-  * `GET /api/auth/google/callback`
-  * `GET /api/auth/me`
-* Test login → returns JWT + user info
-
-### 💻 Frontend
-
-* Setup Vite React + Tailwind CSS
-* Add routing (`/login`, `/feed`)
-* Integrate Google login (`@react-oauth/google`)
-* Store JWT in localStorage
-* Create AuthContext → manage `user`, `isAuthenticated`
-* After login, redirect → `/feed`
-
-✅ **End of Phase 1 Result:**
-User can log in via Google → JWT stored → user state maintained.
-
----
-
-## 📸 **PHASE 2 — Posts & Feed (Day 2)**
-
-**Goal:** Enable post creation, image upload to Cloudinary, and display posts in feed.
-
-### 🔧 Backend
-
-* Define `Post` model
-* Cloudinary config (`cloudinary.ts`)
-* Implement endpoints:
-
-  * `POST /api/posts` — create post (caption + image URL)
-  * `GET /api/posts` — fetch all posts (sorted by latest)
-* Store image URL from Cloudinary API
-
-### 💻 Frontend
-
-* Create **CreatePost** page:
-
-  * Form with caption + image input + preview
-  * Upload image to Cloudinary via API call
-  * Submit → POST `/api/posts`
-* Create **PostCard** component:
-
-  * Displays image, caption, author, likes, comments
-* Create **Feed (Home)** page:
-
-  * Fetch posts from `/api/posts`
-  * Render in list with PostCard components
-* Add Navbar with "Create Post" + "Logout"
-
-✅ **End of Phase 2 Result:**
-Users can create posts → see them in feed with images and captions.
-
----
-
-## ❤️ **PHASE 3 — Likes, Comments & Polish (Day 3)**
-
-**Goal:** Add interactivity + finish UX polish.
-
-### 🔧 Backend
-
-* Add endpoints:
-
-  * `POST /api/posts/:id/like` — toggle like/unlike
-  * `POST /api/posts/:id/comments` — add comment
-* Populate author and comment user fields in responses
-
-### 💻 Frontend
-
-* Extend **PostCard**:
-
-  * Add heart icon → toggle like (optimistic UI)
-  * Show like count
-  * Add “View comments” → toggle comment box
-* Add **CommentBox**:
-
-  * Input + submit → POST `/api/posts/:id/comments`
-  * Display list of comments under post
-* Add loading spinners + error handling
-* Make design responsive:
-
-  * Center feed (max width 600px)
-  * Mobile-first
-* Optional: Profile page (user’s own posts)
-
-✅ **End of Phase 3 Result:**
-App supports likes, comments, smooth UI, and full interaction loop.
-
----
-
-# 🧪 **Testing Checklist**
-
-| ✅ Feature   | Test                               |
-| ----------- | ---------------------------------- |
-| Login       | Google OAuth flow works end-to-end |
-| Create Post | Caption + image upload successful  |
-| Feed        | Displays all posts correctly       |
-| Likes       | Toggle updates instantly           |
-| Comments    | Add + display work                 |
-| Responsive  | Works on mobile and desktop        |
-| Errors      | Handled gracefully                 |
-
----
-
-# 🚀 **Deployment (Optional)**
-
-* **Backend:** Render → set env vars
-* **Frontend:** Vercel → set `VITE_API_URL`
-* **DB:** MongoDB Atlas (already cloud)
-* Update Google OAuth redirect URIs to production URLs
-
----
-
-# ✅ **Definition of Done**
-
-* Google login fully functional
-* Create / read posts (image + caption)
-* Like & comment features complete
-* Responsive, clean UI
-* All routes protected
-* Cloudinary integrated
-* No console errors
-* Ready to demo 🎉
-
----
-
-# 🌱 **Stretch Goals (Optional)**
-
-* Profile page (user’s posts)
-* Toast notifications
-* Infinite scroll feed
-* Following system
-
----
-
-
+Twitter Clone Refactor Plan
+
+This plan migrates the current SocialGram app into a focused Twitter-style product while preserving important code and evolving it incrementally. Work is organized into 8 small, verifiable phases. Each phase lists goals, what to keep, explicit backend/frontend tasks, data and migration notes, API and compatibility strategy, testing/QA, rollout, and risks. Avoid large renames until compatibility shims are in place.
+
+Phase 1 — Domain Alignment & Compatibility Layer
+- Goals
+  - Introduce the “Tweet” domain while keeping existing “Post” flows working.
+  - Establish parallel Tweet routes and adapters so we can refactor safely.
+  - Align language in UI to “Tweet” without breaking e2e and existing tests.
+- Keep
+  - Backend: `postService.ts`, `postRepo.ts`, `Post.ts` model, existing routes under `/api/posts`.
+  - Frontend: `PostCard.tsx`, `usePosts.ts`, `useCreatePost.ts`, Create Post page and Feed view.
+- Backend tasks
+  - Add a tweet compatibility layer that proxies to post service initially:
+    - Create routes file `backend/src/routes/tweetRoutes.ts` that mirrors `postRoutes.ts` endpoints under `/api/tweets`.
+    - Create controller `backend/src/controllers/tweetController.ts` that delegates to `postService` functions 1:1.
+    - Create service alias `backend/src/services/tweetService.ts` that wraps or re-exports `postService` with the same signatures.
+  - Wire routes in `backend/src/app.ts` with `app.use('/api/tweets', tweetRoutes)`.
+  - Ensure error handling and auth middleware usage mirrors `/api/posts`.
+  - Introduce Zod validation foundation (backend-only validation folder, DRY):
+    - Create `backend/src/validation/` to house all input schemas used by controllers and routes. The backend is the authoritative validator.
+    - Inside `backend/src/validation/`, establish this structure (instructions only; no code yet):
+      - `primitives` — base validators reused everywhere (ObjectId, URL, Username, Pagination, Cursor, NonEmptyString, BoundedString).
+      - `tweet` — tweet create/update, like/retweet/bookmark toggles, tweet id params, replies, timelines.
+      - `user` — username, profile update, follow/unfollow params.
+      - `search` — search queries and hashtag params.
+      - `notification` — list/mark-read schemas.
+      - `env` — environment variable schema (parsed by backend during boot).
+      - `shared` — cross-cutting helpers/types and error normalization notes.
+      - `index.ts` — central re-exports for simple imports (e.g., `import { TweetCreateSchema } from '../validation/tweet'`).
+    - DRY principles to follow:
+      - Define constraints once in `primitives` and reuse (e.g., `ObjectId`, `Url`, `Pagination`, `Username`).
+      - Do not repeat the same literals/ranges across schemas; pull into primitives or constants.
+      - Keep controllers thin: apply `validateBody/Query/Params` middleware and pass typed payloads to services; no per-controller ad‑hoc checks that duplicate schema logic.
+    - Install `zod` in backend. Keep client usage optional; UI may add lightweight checks but must not diverge from server rules.
+    - Keep `backend/src/lib/validate.ts` as the thin middleware wrapper around Zod. It should throw `badRequest` with a concise aggregated message on parse failure.
+    - Apply validation to the new tweet routes only in this phase (mirror legacy constraints):
+      - List tweets: validate pagination query (optional `cursor`, `limit` within bounds) using `validation/primitives`.
+      - Create tweet (temporary mirror of post): validate `caption` (string, 1–280), `imageUrl` (URL). This evolves in Phase 2.
+      - Toggle like: validate `params.id` as ObjectId-like string.
+      - Comments/replies: validate body `{ text: string(1–500) }` and params.
+    - Map Zod errors to HTTP 400 via `errorHandler` and `badRequest`; keep error shapes `{ error: string }`.
+- Frontend tasks
+  - Add a new API layer alias:
+    - In `frontend/src/lib/api.ts`, add tweet variants of list/create/like/comment/reply functions pointing at `/api/tweets` (keep existing post functions for now).
+  - Add a separate hook `useTweets` that mirrors `usePosts` but calls tweet API endpoints; do not remove `usePosts` yet.
+  - In `Feed.tsx`, keep using posts for now; create a feature flag (simple constant in `env.ts`) to switch feed source between posts/tweets later.
+  - In UI, update copy where safe (e.g., headings and labels) to say “Tweet” without changing component names.
+- Data & migrations
+  - No schema changes in this phase. Continue to use `Post` collection.
+- API & compatibility
+  - Expose `/api/tweets` endpoints that are equivalent to `/api/posts`.
+  - Keep `/api/posts` fully functional to avoid breaking existing clients/tests.
+- Testing & QA
+  - Duplicate critical backend tests for the new tweet endpoints (same assertions, different base path).
+  - Add smoke Playwright test to hit `/api/tweets` through UI toggle once wired.
+- Rollout
+  - Ship behind a feature flag exposed in frontend `env.ts`.
+- Risks
+  - Duplicate logic diverges. Mitigate by having controllers/services delegate to the same implementation initially.
+
+Phase 2 — Tweet Creation Model Adjustments (Text-first, Optional Media)
+- Goals
+  - Make tweets text-first (optional media). Allow 0–4 images. Keep 280-char limit.
+  - Decouple mandatory `imageUrl` constraint on creation.
+- Keep
+  - Existing Cloudinary upload helper (`frontend/src/lib/cloudinary.ts`).
+- Backend tasks
+  - Update creation validation to allow:
+    - `text` (required, 1–280 chars), `media` (optional array of URLs, max 4). For compatibility, accept `caption` and map to `text`.
+  - Introduce a new Mongoose model `Tweet` or adapt existing `Post` schema minimally:
+    - Option A (recommended for fast rollout): add optional `mediaUrls: string[]`, make `imageUrl` optional, and alias `caption -> text` in service layer.
+    - Option B (clean): create `Tweet` model with fields `{ author, text, media: [url], likes, replies, createdAt, inReplyTo? }` and use same `posts` collection via `collection` option to avoid data copy initially. Keep `Post` for legacy routes.
+  - Add indexes: `{ author: 1, createdAt: -1 }`, `{ createdAt: -1 }`.
+  - Update `postService.createPost` or new `tweetService.createTweet` to support the new payload; when called via legacy route, map `caption` + `imageUrl` into new shape.
+  - Define Zod schemas in `backend/src/validation/` and plug them into controllers:
+    - `validation/tweet/create.ts` (re-exported via `validation/tweet/index.ts`): TweetCreate schema for `{ text: 1–280, media?: 0–4 valid URLs, altText?: array ≤ 500 chars each }`.
+    - Back-compat transform schema for legacy posts: `{ caption, imageUrl } -> { text, media: [imageUrl] }` handled at controller boundary.
+    - Reuse primitives from `validation/primitives` (ObjectId, Url, Pagination) to avoid duplication.
+- Frontend tasks
+  - Update `useCreatePost` to handle text-only and up to 4 images (multiple selection). Leave current flow as default; add UI changes in a separate component or step.
+  - Introduce `CreateTweet` page variant using the same hook, but sending `text` and `media` to `/api/tweets`.
+  - Ensure character count, disabled state, and multi-image preview UX.
+  - Use Zod on the client for compose form validation (optional but recommended):
+    - Add `zod` in frontend and mirror `TweetCreateSchema` for UI validation only; keep server as source of truth.
+    - Parse server error messages to show inline errors.
+- Data & migrations
+  - Backfill existing `Post.imageUrl` into `mediaUrls: [imageUrl]` if added.
+  - No destructive migration yet.
+- API & compatibility
+  - `/api/tweets` accepts `{ text, media? }`.
+  - `/api/posts` continues accepting `{ caption, imageUrl }`.
+- Testing & QA
+  - Unit tests for validation edge cases (0 char, 281 char, >4 media, invalid URLs).
+  - E2E: create tweet with text-only and with multiple images.
+- Rollout
+  - Keep post creation UI available; add Tweet creation as an alternative route for now.
+- Risks
+  - Divergence between legacy and new payloads; mitigate with shared validators.
+
+Phase 3 — Follows & Home Timeline
+- Goals
+  - Add follow graph and a home timeline showing tweets from followed users and self.
+- Keep
+  - Existing user model and username onboarding.
+- Backend tasks
+  - Add `Follow` model (followerId, followeeId, createdAt) with compound unique index.
+  - Endpoints: `POST /api/users/:username/follow`, `DELETE /api/users/:username/follow`, `GET /api/users/:username/followers`, `GET /api/users/:username/following`.
+  - Home timeline endpoint: `GET /api/timeline/home?cursor=...` that returns tweets from `{ author in following ∪ self }` ordered by `createdAt desc` with cursor-based pagination.
+  - Add efficient queries and indexes on follow edges.
+  - Validation schemas (in `backend/src/validation/user` and `backend/src/validation/tweet`)
+    - `FollowParamsSchema`: `{ username: normalized string (3–20, same regex as existing) }`.
+    - `TimelineQuerySchema`: `{ cursor?: string, limit?: number (10–100 default 20) }`.
+- Frontend tasks
+  - Add follow/unfollow buttons on `PublicProfile.tsx` with optimistic UI.
+  - Create `useTimeline` hook fetching `/api/timeline/home` with infinite scroll.
+  - Introduce a new `Home` page (or repurpose `Feed.tsx` via feature flag) to show the home timeline.
+- Data & migrations
+  - No destructive changes. Add indexes for follow lookups.
+- API & compatibility
+  - Keep `/api/users/:username/posts` for old profile grids; add `/api/users/:username/tweets` later.
+- Testing & QA
+  - Unit tests for follow graph constraints (self-follow, duplicates).
+  - E2E: follow/unfollow flow; timeline shows followed accounts.
+  - Contract tests: invalid usernames and out-of-range limits return 400 with helpful messages.
+- Rollout
+  - Release timeline under flag; optionally keep existing “Feed” view as “Explore” placeholder.
+- Risks
+  - Large author sets; mitigate by server-side pagination and indexes.
+
+Phase 4 — Replies, Threads, Tweet Detail
+- Goals
+  - Transition from generic comments to Twitter-style replies and conversation threads.
+  - Provide tweet detail view with threaded replies.
+- Keep
+  - Current comment and reply structures as the initial reply data structure.
+- Backend tasks
+  - Introduce `inReplyTo?: ObjectId` on tweets for first-class threading (or map replies to comments under the hood initially).
+  - Endpoints:
+    - `GET /api/tweets/:id` returns tweet and counts.
+    - `GET /api/tweets/:id/replies?cursor=...` returns direct replies only.
+    - `POST /api/tweets/:id/replies` creates a reply tweet (not nested objects); for compatibility, also write to legacy `comments` until deprecation.
+  - Add counts caching fields: `replyCount`, `likeCount`, `retweetCount` updated transactionally in service.
+  - Validation schemas (in `backend/src/validation/tweet`)
+    - `TweetIdParamsSchema`: `{ id: ObjectId }`.
+    - `ReplyCreateSchema`: `{ text: string(1–280), media?: string[] (0–4 URLs) }`.
+    - `RepliesQuerySchema`: `{ cursor?: string, limit?: number (10–100 default 20) }`.
+- Frontend tasks
+  - Create `TweetDetail` page that renders a tweet and a list of replies using `useTweets`.
+  - Update `PostCard` or add `TweetCard` to show reply count, like, retweet, and comment actions.
+  - Update `PublicProfile.tsx` to open Tweet detail (modal or route) instead of image-only modal, under feature flag.
+- Data & migrations
+  - Backfill: for each `comments` item, optionally create a reply tweet referencing parent; keep original for now.
+  - Add index on `{ inReplyTo: 1, createdAt: -1 }`.
+- API & compatibility
+  - Maintain legacy comment endpoints but internally create reply tweets.
+- Testing & QA
+  - Unit: verify reply creation graphs and counts; pagination correctness.
+  - E2E: create reply from detail view; thread renders in correct order.
+  - Contract tests: bad ids and empty text return 400 with specific messages.
+- Rollout
+  - Gradually switch UI from legacy comments to replies once stable.
+- Risks
+  - Duplicated data between comments and replies; mitigate with scheduled cleanup later.
+
+Phase 5 — Engagements: Likes, Retweets, Quotes, Bookmarks
+- Goals
+  - Expand beyond likes to add retweet (repost), quote tweet, and bookmarks.
+- Keep
+  - Existing like toggle endpoints as-is.
+- Backend tasks
+  - Add fields/models:
+    - `retweets` (array of user ids) or separate `Retweet` documents with indexes.
+    - `quoteOf?: ObjectId` on tweets to track quote tweets.
+    - `bookmarks` per user (collection mapping user → tweet ids) with pagination.
+  - Endpoints: toggle retweet, create quote tweet, toggle bookmark, list bookmarks.
+  - Incremental counters on tweets (`retweetCount`, `quoteCount`, `bookmarkCount`).
+  - Validation schemas (in `backend/src/validation/tweet` and `backend/src/validation/notification`)
+    - `ToggleTweetIdParamsSchema`: `{ id: ObjectId }` for like/retweet/bookmark.
+    - `QuoteCreateSchema`: `{ text: string(1–280), media?: string[] (0–4), quoteOf: ObjectId }`.
+    - `BookmarksQuerySchema`: `{ cursor?: string, limit?: number }`.
+- Frontend tasks
+  - Update card actions to include retweet, quote, bookmark with optimistic updates.
+  - Add a compose flow for quote tweets.
+  - Add “Bookmarks” page and `useBookmarks` hook.
+- Data & migrations
+  - Add indexes for per-user bookmark queries.
+- API & compatibility
+  - Namespaced under `/api/tweets/...` while keeping `/api/posts/:id/like` legacy.
+- Testing & QA
+  - Unit: toggle logic idempotency; race conditions.
+  - E2E: retweet/quote/bookmark flows.
+  - Contract tests: ensure duplicate toggles are idempotent; invalid ids rejected.
+- Rollout
+  - Gate behind flag in UI; gradually expose in nav.
+- Risks
+  - Counter drift; mitigate with atomic updates and periodic reconciliation jobs.
+
+Phase 6 — Search, Hashtags, Mentions
+- Goals
+  - Add entity extraction and search across users and tweets.
+- Keep
+  - Existing user search endpoint and UI as a base.
+- Backend tasks
+  - On create/update, extract hashtags and mentions from tweet text.
+  - Store hashtags in a collection with tweet references (tweetId, tag, createdAt) and indexes on `{ tag: 1, createdAt: -1 }`.
+  - Endpoints: search tweets by text, list tweets by hashtag, resolve mentions to user profiles.
+  - Validation schemas (in `backend/src/validation/search`)
+    - `SearchTweetsQuerySchema`: `{ q: string (trimmed 1–120), type?: 'top'|'latest', cursor?: string, limit?: number }`.
+    - `HashtagParamsSchema`: `{ tag: string (1–50, normalized) }` with strict escaping.
+- Frontend tasks
+  - Autocomplete mentions in compose with debounced user search.
+  - Add hashtag pages and search results view with tabs for Top/Latest/People.
+- Data & migrations
+  - Backfill tags/mentions from existing tweets.
+- API & compatibility
+  - Keep user search path; add `/api/search/tweets` and `/api/hashtags/:tag`.
+- Testing & QA
+  - Unit: tokenizer correctness and escaping; pagination.
+  - E2E: search flows, hashtag navigation, mention linking.
+  - Contract tests: empty query returns 200 with empty result; invalid tag yields 400.
+- Rollout
+  - Ship tokenizer behind a server flag; UI behind a compose-mentions flag.
+- Risks
+  - Regex performance; mitigate with precompiled regex and limits.
+
+Phase 7 — Notifications & Real-time Updates
+- Goals
+  - Notify users on follows, replies, mentions, retweets, and likes.
+  - Deliver near real-time updates to the client.
+- Keep
+  - Existing Express app and middleware patterns.
+- Backend tasks
+  - Add `Notification` model with (userId, type, actorId, tweetId?, createdAt, readAt?).
+  - Write notifications in service layer on relevant actions.
+  - Add endpoints: list notifications, mark read.
+  - Deliver updates via Server-Sent Events or WebSocket (SSE is simpler to phase in); add `/api/stream` endpoint.
+  - Validation schemas (in `backend/src/validation/notification`)
+    - `NotificationsQuerySchema`: `{ cursor?: string, limit?: number }`.
+    - `MarkReadBodySchema`: `{ ids: string[] (1–50, each ObjectId) }`.
+- Frontend tasks
+  - Add `useNotifications` hook with polling fallback; subscribe to SSE for live updates.
+  - Add notifications dropdown/page; unread badge.
+  - Live-update timeline on new tweets from followed users (optional small toast with “View new Tweets”).
+- Data & migrations
+  - Index `{ userId: 1, createdAt: -1 }` for notification listing.
+- API & compatibility
+  - No changes to legacy endpoints.
+- Testing & QA
+  - Unit: notification creation rules per action.
+  - E2E: end-to-end like → notification; reply → notification.
+  - Contract tests: invalid id lists rejected with clear error messages.
+- Rollout
+  - Start with polling, then enable SSE behind flag.
+- Risks
+  - Connection limits; mitigate with fallback polling.
+
+Phase 8 — Hardening, Performance, Observability, and Cleanup
+- Goals
+  - Tighten rate limiting, input validation, error handling, and observability.
+  - Finalize the migration from Post → Tweet and deprecate legacy routes/components.
+- Keep
+  - Testing and CI patterns already present (backend Jest, frontend Playwright/Storybook).
+- Backend tasks
+  - Add rate limiting middleware for write endpoints (auth, create tweet, like, follow, reply).
+  - Add centralized validation utilities and strict payload schemas.
+  - Add pagination consistently (cursor-based) to list endpoints.
+  - Add basic metrics/logging hooks (request logs, endpoint timings) and health checks already present.
+  - Deprecation: respond with redirects or warnings on `/api/posts` and eventually remove once the UI stops calling them.
+  - Zod completion tasks
+    - Enforce Zod validation on all request bodies, params, and queries across all routes (tweets, users, timeline, notifications, search) using schemas sourced exclusively from `backend/src/validation`.
+    - Add environment variable validation using Zod with a schema defined in `backend/src/validation/env` and parsed by `backend/src/constants/env.ts` (fail fast on boot with clear messages).
+    - Add response-shape Zod schemas for critical endpoints (optional) within `backend/src/validation/tweet` and `backend/src/validation/user` to detect server drift during tests.
+- Frontend tasks
+  - Switch feature flags to default on for tweets; update navigation copy and routes.
+  - Replace `PostCard` usages with `TweetCard` and remove old components/hooks once all views are migrated.
+  - Polish: empty states, error states, skeleton loaders.
+  - Zod completion tasks
+    - Use Zod in the client for form validation and safe parsing of critical API responses in dev/test (wrap in a dev-only utility to avoid perf impact in prod builds if desired).
+- Data & migrations
+  - Run cleanup job to reconcile counts and remove legacy `comments` if fully replaced by reply tweets.
+  - Ensure indexes exist and are covered by explain plans for hot queries.
+- API & compatibility
+  - Remove legacy `/api/posts` only after all clients/tests use `/api/tweets`.
+- Testing & QA
+  - Full regression suite: unit (services and repos), e2e (auth, compose, interactions, timeline), accessibility smoke.
+  - Load test critical endpoints (timeline read, tweet create) with modest concurrency.
+- Rollout
+  - Gradually roll out flags to 100%, monitor error rates.
+- Risks
+  - Breaking clients during deprecation; mitigate with staged rollout and telemetry.
+
+Cross-cutting Implementation Notes
+- File-by-file guidance (non-exhaustive, to be applied per phase as it becomes relevant):
+  - Backend
+    - `backend/src/app.ts`: Register new routes (`/api/tweets`, `/api/timeline`, `/api/stream`) and keep legacy `/api/posts` until Phase 8.
+    - `backend/src/models/Post.ts`: Either extend schema with optional `mediaUrls` and `inReplyTo` or introduce a dedicated `Tweet` model reusing the same collection initially.
+    - `backend/src/services/postService.ts`: Extract validators (lengths, URL checks) into a shared util; create `tweetService.ts` to own new behavior; keep `postService` delegating during transition.
+    - `backend/src/db/postRepo.ts`: Mirror functions in a `tweetRepo.ts` with pagination and new projections; keep population paths consistent.
+    - `backend/src/routes/*`: Add `tweetRoutes.ts`, `timelineRoutes.ts`, and follow endpoints in `userRoutes.ts`.
+    - `backend/src/controllers/*`: Add controllers for tweets/timeline to encapsulate mapping and counters.
+    - `backend/src/constants/env.ts`: Add flags to enable tweet features progressively.
+  - Frontend
+    - `frontend/src/lib/api.ts`: Add tweet-first APIs; keep post variants for compatibility until fully migrated.
+    - Hooks: add `useTweets`, `useTimeline`, `useTweetReplies`, `useRetweet`, `useBookmarks`, `useNotifications` following existing hook patterns.
+    - Components: introduce `TweetCard` based on `PostCard.tsx` (reuse as much as possible), `TweetComposer`, `TweetDetail`.
+    - Pages: `Home` (timeline), `Bookmarks`, `Notifications` as incremental add-ons.
+    - `frontend/src/constants/env.ts`: Add feature flags for tweet routes and real-time support.
+- Security & validation
+  - Sanitize and validate all user text inputs (tweet text, replies, usernames) server-side; enforce maximum sizes and rate limits.
+  - Verify auth on all write endpoints; prefer consistent 401/403 handling.
+  - Zod validation strategy (backend validation folder, DRY):
+    - Packages: add `zod` to backend only. Frontend may mirror minimal, non-authoritative checks for UX, but must not diverge from server rules.
+    - Centralize schemas: define all validators in `backend/src/validation`. Export reusable primitives (ObjectId, URL, Pagination, Username) and feature schemas (tweet, user, search, notification). Use `z.infer` only on the server.
+    - Imports: controllers and routes import solely from `../validation/...`. Avoid duplicating inline checks inside controllers/services.
+    - Middleware: use `backend/src/lib/validate.ts` for body/query/params; apply per-route after `requireAuth` where needed.
+    - Error mapping: normalize Zod errors into a compact message string; return HTTP 400 via `badRequest` so the existing `errorHandler` produces `{ error }` consistently.
+    - Testing: add unit tests that call controllers/services with invalid inputs to assert 400 and helpful messages; add E2E cases for common invalid inputs.
+    - Governance: document schema changes in a `backend/src/validation/README.md` (mark breaking changes, provide migration notes for controllers and clients); avoid schema duplication to maintain DRY.
+- Accessibility & UX
+  - Provide alt text entry for images in compose; keyboard focus management for modals; aria-labels on icon buttons.
+- Telemetry & monitoring
+  - Add structured logs; simple metrics (counts per endpoint); capture error responses for alerting.
+
+Acceptance Criteria Summary Per Phase
+- Phase 1: `/api/tweets` mirrors `/api/posts`; Feed continues to work; tests pass for both.
+- Phase 2: Create tweet with text-only and multi-image; validation enforced; UI supports char count and multiple images.
+- Phase 3: Follow/unfollow works; home timeline shows followed users’ tweets with pagination.
+- Phase 4: Tweet detail page shows replies; reply creation works; counts accurate.
+- Phase 5: Retweet/quote/bookmark actions work; counters update; bookmarks page lists items.
+- Phase 6: Search by text and hashtag; hashtag pages render; mentions link to profiles.
+- Phase 7: Notifications list updates on actions; optional SSE delivers live updates.
+- Phase 8: Legacy `/api/posts` removed; all features stable; rate limits and tests in place.
+
+Out of Scope (for now)
+- DMs, multi-tenant spaces, paid features, and advanced media processing (video transcoding). These can be revisited after Phase 8.

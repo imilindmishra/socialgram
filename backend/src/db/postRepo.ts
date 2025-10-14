@@ -9,7 +9,9 @@ export async function listPostsPopulated() {
     .populate('comments.replies.user', 'name profilePicture');
 }
 
-export async function createPost(doc: Pick<IPost, 'author' | 'caption' | 'imageUrl'>) {
+export async function createPost(
+  doc: Pick<IPost, 'author' | 'caption'> & Partial<Pick<IPost, 'imageUrl' | 'mediaUrls'>>
+) {
   const post = await Post.create(doc as any);
   return post
     .populate('author', 'name profilePicture')
@@ -30,6 +32,12 @@ export async function populatePost(post: IPost) {
 
 export async function savePost(post: IPost) {
   await post.save();
+  return populatePost(post);
+}
+
+export async function findPopulatedById(id: string) {
+  const post = await Post.findById(id);
+  if (!post) return null;
   return populatePost(post);
 }
 

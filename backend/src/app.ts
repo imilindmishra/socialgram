@@ -4,6 +4,8 @@ import passport from 'passport';
 import authRoutes from './routes/authRoutes';
 import postRoutes from './routes/postRoutes';
 import userRoutes from './routes/userRoutes';
+import timelineRoutes from './routes/timelineRoutes';
+import tweetRoutes from './routes/tweetRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import { CLIENT_URL as CLIENT_ORIGIN } from './constants/env';
 
@@ -32,7 +34,8 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/timeline', timelineRoutes);
+app.use('/api/tweets', tweetRoutes);
 
 // Error handler
 app.use(errorHandler);
-
