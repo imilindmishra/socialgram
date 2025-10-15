@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { uploadImageToCloudinary } from '../lib/cloudinary';
-import { createPost } from '../lib/api';
+import { createPost, createTweet } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { USE_TWEETS } from '../constants/env';
 
 export function useCreatePost() {
   const { token } = useAuth();
@@ -30,7 +31,9 @@ export function useCreatePost() {
     setError(null);
     try {
       const imageUrl = await uploadImageToCloudinary(file!);
-      const res = await createPost(token || undefined, { caption, imageUrl });
+      const res = USE_TWEETS
+        ? await createTweet(token || undefined, { text: caption, media: [imageUrl] })
+        : await createPost(token || undefined, { caption, imageUrl });
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Failed to create post');

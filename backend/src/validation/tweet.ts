@@ -30,3 +30,11 @@ export const TweetRepliesQuerySchema = z.object({
   cursor: z.string().datetime().optional(),
   limit: z.coerce.number().int().min(1).max(100).optional().default(20),
 });
+
+export const TweetListQuerySchema = TweetRepliesQuerySchema;
+
+
+export const QuoteCreateSchema = z.object({
+  text: Caption280,
+  media: z.array(Url).max(4).optional().default([]),
+});

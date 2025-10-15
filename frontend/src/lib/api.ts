@@ -61,6 +61,128 @@ export async function toggleTweetLike(token: string | undefined, tweetId: string
   return res;
 }
 
+export async function toggleRetweet(token: string | undefined, tweetId: string) {
+  const res = await fetch(`${API_URL}/api/tweets/${tweetId}/retweet`, {
+    method: 'POST',
+    headers: authHeaders(token),
+  });
+  return res;
+}
+
+export async function createQuote(
+  token: string | undefined,
+  tweetId: string,
+  body: { text: string; media?: string[] }
+) {
+  const res = await fetch(`${API_URL}/api/tweets/${tweetId}/quote`, {
+    method: 'POST',
+    headers: authHeaders(token, { 'Content-Type': 'application/json' }),
+    body: JSON.stringify(body),
+  });
+  return res;
+}
+
+export async function toggleBookmark(token: string | undefined, tweetId: string) {
+  const res = await fetch(`${API_URL}/api/tweets/${tweetId}/bookmark`, {
+    method: 'POST',
+    headers: authHeaders(token),
+  });
+  return res;
+}
+
+export async function listBookmarks(
+  token: string | undefined,
+  params?: { cursor?: string; limit?: number }
+) {
+  const q = new URLSearchParams();
+  if (params?.cursor) q.set('cursor', params.cursor);
+  if (params?.limit) q.set('limit', String(params.limit));
+  const res = await fetch(`${API_URL}/api/tweets/bookmarks?${q.toString()}`, {
+    headers: authHeaders(token),
+  });
+  return res;
+}
+
+export async function getTweet(token: string | undefined, id: string) {
+  const res = await fetch(`${API_URL}/api/tweets/${id}`, { headers: authHeaders(token) });
+  return res;
+}
+
+export async function listTweetReplies(
+  token: string | undefined,
+  id: string,
+  params?: { cursor?: string; limit?: number }
+) {
+  const q = new URLSearchParams();
+  if (params?.cursor) q.set('cursor', params.cursor);
+  if (params?.limit) q.set('limit', String(params.limit));
+  const res = await fetch(`${API_URL}/api/tweets/${id}/replies?${q.toString()}`, {
+    headers: authHeaders(token),
+  });
+  return res;
+}
+
+export async function getHomeTimeline(
+  token: string | undefined,
+  params?: { cursor?: string; limit?: number }
+) {
+  const q = new URLSearchParams();
+  if (params?.cursor) q.set('cursor', params.cursor);
+  if (params?.limit) q.set('limit', String(params.limit));
+  const res = await fetch(`${API_URL}/api/timeline/home?${q.toString()}`, {
+    headers: authHeaders(token),
+  });
+  return res;
+}
+
+export async function followUser(token: string | undefined, username: string) {
+  const res = await fetch(`${API_URL}/api/users/${encodeURIComponent(username)}/follow`, {
+    method: 'POST',
+    headers: authHeaders(token),
+  });
+  return res;
+}
+
+export async function unfollowUser(token: string | undefined, username: string) {
+  const res = await fetch(`${API_URL}/api/users/${encodeURIComponent(username)}/follow`, {
+    method: 'DELETE',
+    headers: authHeaders(token),
+  });
+  return res;
+}
+
+export async function listFollowers(username: string) {
+  const res = await fetch(`${API_URL}/api/users/${encodeURIComponent(username)}/followers`);
+  return res;
+}
+
+export async function listFollowing(username: string) {
+  const res = await fetch(`${API_URL}/api/users/${encodeURIComponent(username)}/following`);
+  return res;
+}
+
+export async function listNotifications(
+  token: string | undefined,
+  params?: { cursor?: string; limit?: number }
+) {
+  const sp = new URLSearchParams();
+  if (params?.cursor) sp.set('cursor', params.cursor);
+  if (params?.limit) sp.set('limit', String(params.limit));
+  const res = await fetch(`${API_URL}/api/notifications?${sp.toString()}`, {
+    headers: authHeaders(token),
+  });
+  return res;
+}
+
+export async function markNotificationsRead(token: string | undefined, ids: string[]) {
+  const res = await fetch(`${API_URL}/api/notifications/read`, {
+    method: 'POST',
+    headers: authHeaders(token, { 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ ids }),
+  });
+  return res;
+}
+
 export async function addComment(token: string | undefined, postId: string, text: string) {
   const res = await fetch(`${API_URL}/api/posts/${postId}/comments`, {
     method: 'POST',
@@ -132,3 +254,5 @@ export async function searchUsers(query: string) {
   const res = await fetch(`${API_URL}/api/users/search?q=${encodeURIComponent(q)}`);
   return res;
 }
+
+// removed search tweets and hashtag APIs

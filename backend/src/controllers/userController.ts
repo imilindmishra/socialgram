@@ -57,7 +57,8 @@ export async function listUserPosts(req: Request, res: Response) {
     .sort({ createdAt: -1 })
     .populate('author', 'name profilePicture')
     .populate('comments.user', 'name profilePicture')
-    .populate('comments.replies.user', 'name profilePicture');
+    .populate('comments.replies.user', 'name profilePicture')
+    .populate({ path: 'quoteOf', select: 'imageUrl mediaUrls' });
   res.json({ posts });
 }
 

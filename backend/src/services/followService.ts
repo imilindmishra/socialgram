@@ -43,4 +43,3 @@ export async function listFolloweeIds(userId: string) {
   const edges = await Follow.find({ follower: userId }, { followee: 1, _id: 0 }).lean();
   return edges.map((e) => e.followee);
 }
-

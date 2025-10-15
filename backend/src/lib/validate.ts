@@ -11,10 +11,11 @@ function formatValidationError(err: any): string {
   return err?.message || 'Invalid request';
 }
 
-export function validateBody<T>(schema: SchemaLike<T>): RequestHandler {
+export function validate<T>(schema: SchemaLike<T>, source: 'body' | 'params' | 'query'): RequestHandler {
   return async (req, _res, next) => {
     try {
-      (req as any).body = await schema.parseAsync(req.body);
+      const input = (req as any)[source];
+      (req as any)[source] = await schema.parseAsync(input);
       next();
     } catch (err: any) {
       next(badRequest(formatValidationError(err)));
@@ -22,25 +23,4 @@ export function validateBody<T>(schema: SchemaLike<T>): RequestHandler {
   };
 }
 
-export function validateParams<T>(schema: SchemaLike<T>): RequestHandler {
-  return async (req, _res, next) => {
-    try {
-      (req as any).params = await schema.parseAsync(req.params);
-      next();
-    } catch (err: any) {
-      next(badRequest(formatValidationError(err)));
-    }
-  };
-}
-
-export function validateQuery<T>(schema: SchemaLike<T>): RequestHandler {
-  return async (req, _res, next) => {
-    try {
-      (req as any).query = await schema.parseAsync(req.query);
-      next();
-    } catch (err: any) {
-      next(badRequest(formatValidationError(err)));
-    }
-  };
-}
-
+export { formatValidationError };

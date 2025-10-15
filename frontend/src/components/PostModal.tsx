@@ -23,7 +23,15 @@ export default function PostModal({ post: initial, onClose }: { post: PostType; 
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div role="dialog" aria-modal="true" className="relative z-10 bg-white rounded-md shadow-xl w-[min(95vw,1000px)] h-[min(90vh,720px)] flex overflow-hidden">
         <div className="flex-1 bg-black flex items-center justify-center">
-          <img src={post.imageUrl} alt={post.caption} className="max-h-full max-w-full object-contain" />
+          {(() => {
+            const anyPost: any = post as any;
+            const src = anyPost.imageUrl || (anyPost.mediaUrls?.[0]) || (anyPost.quoteOf?.imageUrl) || (anyPost.quoteOf?.mediaUrls?.[0]);
+            return src ? (
+              <img src={src} alt={post.caption} className="max-h-full max-w-full object-contain" />
+            ) : (
+              <div className="text-white/80 text-sm p-4">No media</div>
+            );
+          })()}
         </div>
         <div className="w-[380px] max-w-[50%] flex flex-col">
           <div className="flex items-center justify-between p-3 border-b">
@@ -125,4 +133,3 @@ export default function PostModal({ post: initial, onClose }: { post: PostType; 
     </div>
   );
 }
-

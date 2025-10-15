@@ -13,7 +13,9 @@ export interface IPost extends Document {
   imageUrl?: string;
   mediaUrls?: string[];
   likes: Types.ObjectId[];
+  retweets?: Types.ObjectId[];
   comments: IComment[];
+  quoteOf?: Types.ObjectId | null;
   createdAt: Date;
 }
 
@@ -49,7 +51,9 @@ const PostSchema = new Schema<IPost>(
     imageUrl: { type: String },
     mediaUrls: { type: [String], default: [] },
     likes: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
+    retweets: [{ type: Schema.Types.ObjectId, ref: 'User', default: [] }],
     comments: { type: [CommentSchema], default: [] },
+    quoteOf: { type: Schema.Types.ObjectId, ref: 'Post', default: null },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );

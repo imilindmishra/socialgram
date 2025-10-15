@@ -6,6 +6,9 @@ import AuthCallback from './pages/AuthCallback';
 import CreatePost from './pages/CreatePost';
 import OnboardingUsername from './pages/OnboardingUsername';
 import PublicProfile from './pages/PublicProfile';
+import Bookmarks from './pages/Bookmarks';
+import TweetDetail from './pages/TweetDetail';
+// Removed Hashtag, SearchTweets, and Notifications features
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
   const { isAuthenticated, needsUsername } = useAuth();
@@ -71,6 +74,7 @@ function Navbar() {
             )}
           </div>
           <Link to="/create" className="text-sm text-blue-600">Create Post</Link>
+          <Link to="/bookmarks" className="text-sm">Bookmarks</Link>
           {needsUsername ? (
             <Link to="/onboarding/username" className="text-sm">Set username</Link>
           ) : (
@@ -102,6 +106,8 @@ export default function App() {
           <Route path="/feed" element={<PrivateRoute><Feed /></PrivateRoute>} />
           <Route path="/create" element={<PrivateRoute><CreatePost /></PrivateRoute>} />
           <Route path="/onboarding/username" element={<PrivateRoute><OnboardingUsername /></PrivateRoute>} />
+          <Route path="/bookmarks" element={<PrivateRoute><Bookmarks /></PrivateRoute>} />
+          <Route path="/t/:id" element={<PrivateRoute><TweetDetail /></PrivateRoute>} />
           <Route path="/u/:username" element={<PublicProfile />} />
           <Route path="/" element={<Navigate to="/feed" replace />} />
           <Route path="*" element={<Navigate to="/feed" replace />} />
