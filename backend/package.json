@@ -12,6 +12,7 @@
     "test:e2e": "jest src/__tests__/e2e"
   },
   "dependencies": {
+    "@aws-sdk/client-kms": "^3.916.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",

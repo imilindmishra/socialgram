@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IUser extends Document {
   googleId: string;
-  email: string;
+  emailEnc: string;              // encrypted email
   name: string;
   profilePicture?: string;
   username?: string | null;
@@ -12,7 +12,7 @@ export interface IUser extends Document {
 const UserSchema = new Schema<IUser>(
   {
     googleId: { type: String, required: true, unique: true, index: true },
-    email: { type: String, required: true, index: true },
+    emailEnc: { type: String, required: true },   //  store ciphertext
     name: { type: String, required: true },
     profilePicture: { type: String },
     username: { type: String, unique: true, sparse: true, lowercase: true, trim: true },
