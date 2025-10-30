@@ -32,7 +32,7 @@ export async function updateMe(req: AuthedRequest, res: Response) {
   const updated = await User.findByIdAndUpdate(
     userId,
     { username: username.toLowerCase() },
-    { new: true, projection: 'name email profilePicture username createdAt' }
+    { new: true, projection: 'name profilePicture username createdAt' }
   );
   return res.json({ user: updated });
 }

@@ -12,3 +12,5 @@ export const MONGODB_URI = parsed.MONGODB_URI;
 export const GOOGLE_CLIENT_ID = parsed.GOOGLE_CLIENT_ID;
 export const GOOGLE_CLIENT_SECRET = parsed.GOOGLE_CLIENT_SECRET;
 export const JWT_SECRET = parsed.JWT_SECRET;
+export const PII_ENCRYPTION_KEY_ID = parsed.PII_ENCRYPTION_KEY_ID;
+export const PII_KMS_REGION = parsed.PII_KMS_REGION;

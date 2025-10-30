@@ -7,11 +7,14 @@ process.env.CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 process.env.SERVER_URL = process.env.SERVER_URL || 'http://localhost:4000';
 process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'test-google-id';
 process.env.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || 'test-google-secret';
+process.env.PII_ENCRYPTION_KEY_ID = process.env.PII_ENCRYPTION_KEY_ID || 'test-kms-key';
+process.env.PII_ENCRYPTION_LOCAL_MODE = 'true';
 
 import { app } from '../../app';
 import { connectDB } from '../../config/db';
 import { User } from '../../models/User';
 import { signJwt } from '../../utils/jwt';
+import { encryptPII } from '../../lib/kms';
 
 describe('Follow + Home Timeline', () => {
   let mongo: MongoMemoryServer;
@@ -26,10 +29,12 @@ describe('Follow + Home Timeline', () => {
     process.env.MONGODB_URI = uri;
     await connectDB();
 
-    userA = await User.create({ googleId: 'gid-A', email: 'a@example.com', name: 'User A', username: 'usera' });
-    userB = await User.create({ googleId: 'gid-B', email: 'b@example.com', name: 'User B', username: 'userb' });
-    tokenA = signJwt({ sub: userA.id, email: userA.email, name: userA.name });
-    tokenB = signJwt({ sub: userB.id, email: userB.email, name: userB.name });
+    const emailA = 'a@example.com';
+    const emailB = 'b@example.com';
+    userA = await User.create({ googleId: 'gid-A', emailEnc: await encryptPII(emailA), name: 'User A', username: 'usera' });
+    userB = await User.create({ googleId: 'gid-B', emailEnc: await encryptPII(emailB), name: 'User B', username: 'userb' });
+    tokenA = signJwt({ sub: userA.id, email: emailA, name: userA.name });
+    tokenB = signJwt({ sub: userB.id, email: emailB, name: userB.name });
   });
 
   afterAll(async () => {
@@ -72,4 +77,3 @@ describe('Follow + Home Timeline', () => {
     expect(page2.body.posts.length).toBe(1);
   });
 });
-

@@ -6,7 +6,7 @@ import { requireAuth } from '../middleware/auth';
 import { User } from '../models/User';
 import { CLIENT_URL } from '../constants/env';
 import { asyncHandler } from '../lib/asyncHandler';
-import { decryptPII } from '../lib/kms';   
+import { decrypt } from '../lib/encryption';   
 
 configurePassport();
 
@@ -17,7 +17,7 @@ router.get(
   passport.authenticate('google', { scope: ['profile', 'email'], session: false })
 );
 
-// After Google callback, we decrypt email before putting it in the JWT (if you need email in the token).
+// After Google callback, we decrypt email before putting it in the JWT .
 router.get(
   '/google/callback',
   passport.authenticate('google', { failureRedirect: '/api/auth/failure', session: false }),
@@ -26,7 +26,7 @@ router.get(
     const userId = (user._id || user.id).toString();
 
     
-    const decryptedEmail = await decryptPII(user.emailEnc);
+    const decryptedEmail = await decrypt(user.emailEnc);
 
     
     const token = signJwt({ sub: userId, email: decryptedEmail, name: user.name });
@@ -49,7 +49,7 @@ router.get(
     if (!me) return res.status(401).json({ error: 'Unauthorized' });
 
     // ✅ Decrypt email for response
-    const email = await decryptPII(me.emailEnc);
+    const email = await decrypt(me.emailEnc);
 
     res.json({
       user: {

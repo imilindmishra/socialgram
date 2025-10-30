@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { getHomeTimeline } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import type { Post } from '../components/PostCard';
@@ -10,9 +10,11 @@ export function useTimeline(limit = 20) {
   const [error, setError] = useState<string | null>(null);
   const [nextCursor, setNextCursor] = useState<string | undefined>(undefined);
   const [hasMore, setHasMore] = useState(true);
+  const loadingRef = useRef(false);
 
   const load = useCallback(async (cursor?: string) => {
-    if (loading) return;
+    if (loadingRef.current) return;
+    loadingRef.current = true;
     setLoading(true);
     setError(null);
     try {
@@ -25,9 +27,10 @@ export function useTimeline(limit = 20) {
     } catch (err: any) {
       setError(err.message || 'Failed to load timeline');
     } finally {
+      loadingRef.current = false;
       setLoading(false);
     }
-  }, [token, limit, loading]);
+  }, [token, limit]);
 
   useEffect(() => {
     load(undefined);
@@ -39,4 +42,3 @@ export function useTimeline(limit = 20) {
 
   return { items, loading, error, hasMore, loadMore, reload: () => load(undefined) };
 }
-

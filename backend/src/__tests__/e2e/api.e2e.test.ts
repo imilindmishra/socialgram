@@ -8,11 +8,14 @@ process.env.CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 process.env.SERVER_URL = process.env.SERVER_URL || 'http://localhost:4000';
 process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'test-google-id';
 process.env.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || 'test-google-secret';
+process.env.PII_ENCRYPTION_KEY_ID = process.env.PII_ENCRYPTION_KEY_ID || 'test-kms-key';
+process.env.PII_ENCRYPTION_LOCAL_MODE = 'true';
 
 import { app } from '../../app';
 import { connectDB } from '../../config/db';
 import { User } from '../../models/User';
 import { signJwt } from '../../utils/jwt';
+import { encryptPII } from '../../lib/kms';
 
 describe('API E2E', () => {
   let mongo: MongoMemoryServer;
@@ -25,14 +28,15 @@ describe('API E2E', () => {
     await connectDB();
 
     const gid = `gid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const email = 't@example.com';
     const user = await User.create({
       googleId: gid,
-      email: 't@example.com',
+      emailEnc: await encryptPII(email),
       name: 'Test User',
       profilePicture: 'https://example.com/pp.png',
     });
     // Mongoose provides a string virtual id
-    token = signJwt({ sub: user.id, email: user.email, name: user.name });
+    token = signJwt({ sub: user.id, email, name: user.name });
   });
 
   afterAll(async () => {

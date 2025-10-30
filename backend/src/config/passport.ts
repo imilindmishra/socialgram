@@ -2,7 +2,7 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
 import { User } from '../models/User';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SERVER_URL } from '../constants/env';
-import { encryptPII } from '../lib/kms';   
+import { encrypt } from '../lib/encryption';   
 
 export function configurePassport() {
   const clientID = GOOGLE_CLIENT_ID as string;
@@ -20,7 +20,7 @@ export function configurePassport() {
           const profilePicture = profile.photos?.[0]?.value;
 
           let user = await User.findOne({ googleId });
-          const emailEnc = await encryptPII(email);   // 🔐
+          const emailEnc = await encrypt(email);   // Encrypt email before storing
 
           if (!user) {
             user = await User.create({ googleId, emailEnc, name, profilePicture });
